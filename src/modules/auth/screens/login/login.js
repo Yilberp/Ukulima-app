@@ -5,16 +5,18 @@ import {
   ImageBackground,
   Dimensions,
   View,
+  Pressable,
 } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import Constants from "expo-constants";
 import React, { useContext } from "react";
-import { Link } from "react-router-native";
+import { useNavigate } from "react-router-native";
 import LoginContext from "../../../../context/auth/authContext";
 const logo = require("../../../../../assets/logo-vertical-white.png");
 const image = require("../../../../../assets/image-background.jpg");
 const ScreenHeight = Dimensions.get("window").height;
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const {
@@ -78,7 +80,7 @@ export default function Login() {
             >
               ¿No tienes cuenta?
             </Text>
-            <Link to={"/register"}>
+            <Pressable onPress={() => navigate("/register")}>
               <Text
                 style={{
                   color: "#063C2D",
@@ -87,7 +89,7 @@ export default function Login() {
               >
                 Registrate
               </Text>
-            </Link>
+            </Pressable>
           </View>
         </View>
       </ImageBackground>
