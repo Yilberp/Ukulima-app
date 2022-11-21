@@ -18,12 +18,21 @@ const LoginProvider = ({ children }) => {
           return {
             ...prevState,
             isSignout: false,
+            isSignUp: false,
             userToken: action.token,
+          };
+        case "SIGN_UP":
+          return {
+            ...prevState,
+            isSignout: false,
+            isSignUp: true,
+            userToken: null,
           };
         case "SIGN_OUT":
           return {
             ...prevState,
             isSignout: true,
+            isSignUp: false,
             userToken: null,
           };
       }
@@ -31,6 +40,7 @@ const LoginProvider = ({ children }) => {
     {
       isLoading: true,
       isSignout: false,
+      isSignUp: false,
       userToken: null,
     }
   );
@@ -71,6 +81,7 @@ const LoginProvider = ({ children }) => {
           const result = await response.json();
           if (result.token) {
             await SecureStore.setItemAsync("userToken", result.token);
+            console.log("inicie sesion");
             dispatch({ type: "SIGN_IN", token: result.token });
           }
         } catch (error) {
@@ -90,7 +101,7 @@ const LoginProvider = ({ children }) => {
         const options = {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: data,
+          body: JSON.stringify(data),
         };
         try {
           const response = await globalThis.fetch(
@@ -98,12 +109,27 @@ const LoginProvider = ({ children }) => {
             options
           );
           if (response.status === 200 && response.ok) {
-            signIn({ emailOrPhone: data.email, password: data.password });
+            const options2 = {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                emailOrPhone: data.email,
+                password: data.password,
+              }),
+            };
+            console.log("registre");
+            dispatch({ type: "SIGN_UP" });
+            const response2 = await globalThis.fetch(url + "login", options2);
+            const result2 = await response2.json();
+            if (result2.token) {
+              await SecureStore.setItemAsync("userToken", result2.token);
+              console.log("inicie sesion2");
+              dispatch({ type: "SIGN_IN", token: result2.token });
+            }
           }
         } catch (error) {
           throw error;
         }
-        //dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
       },
     }),
     []

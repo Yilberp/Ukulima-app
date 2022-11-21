@@ -17,6 +17,7 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useNavigate } from "react-router-native";
 import Constants from "expo-constants";
 import React from "react";
+import { Picker } from "@react-native-picker/picker";
 import LoginContext from "../../../../context/auth/authContext";
 const logo = require("../../../../../assets/logo-vertical-white.png");
 const image = require("../../../../../assets/image-background.jpg");
@@ -24,12 +25,22 @@ const ScreenHeight = Dimensions.get("window").height;
 
 export default function Register() {
   const navigate = useNavigate();
-  const { signUp } = React.useContext(LoginContext);
-  const [email, setEmail] = React.useState("");
+  const {
+    authContext: { signUp, signIn },
+    state,
+  } = React.useContext(LoginContext);
   const [data, setData] = React.useState({
     nombres: "",
+    apellidos: "",
+    email: "",
+    password: "",
+    identificacion: "",
+    idTipoIdentificacion: "",
+    confirmationToken: "",
+    estado: false,
+    fechaNacimiento: "",
+    telefono: "",
   });
-  const [password, setPassword] = React.useState("");
   const [date, setDate] = React.useState(new Date());
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -48,8 +59,20 @@ export default function Register() {
   const showDatepicker = () => {
     showMode("date");
   };
-  const handleData = (e) => {
-    console.log(typeof e);
+  const create = async () => {
+    const newData = {
+      ...data,
+      identificacion: Number(data.identificacion),
+      idTipoIdentificacion: {
+        idTipo: Number(data.idTipoIdentificacion),
+        nombre: "CC",
+        agricultorCollection: null,
+      },
+      estado: false,
+      confirmationToken: "",
+      fechaNacimiento: date.toJSON().split("T")[0],
+    };
+    await signUp(newData);
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -82,24 +105,24 @@ export default function Register() {
                     activeUnderlineColor="#063C2D"
                     label="Nombres"
                     value={data.nombres}
-                    onChangeText={(e) => handleData(e)}
+                    onChangeText={(e) => setData({ ...data, nombres: e })}
                   />
                   <TextInput
                     style={styles.inputGroup}
                     textColor="#063C2D"
                     activeUnderlineColor="#063C2D"
                     label="Apellidos"
-                    value={email}
-                    onChangeText={(email) => setEmail(email)}
+                    value={data.apellidos}
+                    onChangeText={(e) => setData({ ...data, apellidos: e })}
                   />
                   <TextInput
                     style={styles.inputGroup}
                     textColor="#063C2D"
                     activeUnderlineColor="#063C2D"
                     label="Correo electronico"
-                    value={email}
+                    value={data.email}
                     keyboardType={"email-address"}
-                    onChangeText={(email) => setEmail(email)}
+                    onChangeText={(e) => setData({ ...data, email: e })}
                   />
                   <View style={styles.inputGroupTwo}>
                     <TextInput
@@ -107,18 +130,20 @@ export default function Register() {
                       textColor="#063C2D"
                       activeUnderlineColor="#063C2D"
                       label="Telefono"
-                      value={email}
+                      value={data.telefono}
                       keyboardType={"numeric"}
-                      onChangeText={(email) => setEmail(email)}
+                      onChangeText={(e) => setData({ ...data, telefono: e })}
                     />
-                    <TextInput
+                    <Picker
                       style={styles.input50}
-                      textColor="#063C2D"
-                      activeUnderlineColor="#063C2D"
-                      label="Tipo Identificacion"
-                      value={email}
-                      onChangeText={(email) => setEmail(email)}
-                    />
+                      selectedValue={data.idTipoIdentificacion}
+                      onValueChange={(itemValue, itemIndex) =>
+                        setData({ ...data, idTipoIdentificacion: itemValue })
+                      }
+                    >
+                      <Picker.Item label="Seleccionar" value="" />
+                      <Picker.Item label="Cédula de Ciudadanía" value="1" />
+                    </Picker>
                   </View>
 
                   <View style={styles.inputGroupTwo}>
@@ -127,9 +152,11 @@ export default function Register() {
                       textColor="#063C2D"
                       activeUnderlineColor="#063C2D"
                       label="# identificacion"
-                      value={email}
+                      value={data.identificacion}
                       keyboardType={"numeric"}
-                      onChangeText={(email) => setEmail(email)}
+                      onChangeText={(e) =>
+                        setData({ ...data, identificacion: e })
+                      }
                     />
                     <View style={styles.inputDate}>
                       <Text>{date.toDateString()}</Text>
@@ -146,22 +173,21 @@ export default function Register() {
                     textColor="#063C2D"
                     activeUnderlineColor="#063C2D"
                     label="Contraseña"
-                    value={password}
+                    value={data.password}
                     secureTextEntry={true}
-                    onChangeText={(password) => setPassword(password)}
+                    onChangeText={(e) => setData({ ...data, password: e })}
                   />
                 </View>
 
-                <View>
-                  <Button
-                    style={styles.formButton}
-                    buttonColor="#15A249"
-                    mode="contained"
-                    onPress={() => signUp({})}
-                  >
-                    <Text style={styles.text}>Continuar</Text>
-                  </Button>
-                </View>
+                <Button
+                  style={styles.formButton}
+                  buttonColor="#15A249"
+                  mode="contained"
+                  onPress={() => create()}
+                >
+                  <Text style={styles.text}>Continuar</Text>
+                </Button>
+
                 <View style={styles.formTextGroup}>
                   <Text
                     style={{
