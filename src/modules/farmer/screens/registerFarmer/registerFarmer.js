@@ -11,13 +11,28 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useNavigate } from "react-router-native";
 
 import Constants from "expo-constants";
+import AgricultorContext from "../../../../context/agricultor/agricultorContext";
 const ScreenHeight = Dimensions.get("window").height;
 
 export default function RegisterFarmer() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const { postData, isLoading } = React.useContext(AgricultorContext);
+  const [data, setData] = React.useState({
+    nombres: "",
+    apellidos: "",
+    email: "",
+    password: "",
+    identificacion: "",
+    idTipoIdentificacion: {
+      idTipo: 1,
+      nombre: "CC",
+      agricultorCollection: null,
+    },
+    confirmationToken: "",
+    estado: false,
+    fechaNacimiento: "",
+    telefono: "",
+  });
   const [date, setDate] = React.useState(new Date());
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -35,6 +50,16 @@ export default function RegisterFarmer() {
 
   const showDatepicker = () => {
     showMode("date");
+  };
+  const create = async () => {
+    const newData = {
+      ...data,
+      identificacion: Number(data.identificacion),
+      estado: false,
+      confirmationToken: "",
+      fechaNacimiento: date.toJSON().split("T")[0],
+    };
+    await postData(newData);
   };
   return (
     <SafeAreaView
@@ -104,16 +129,16 @@ export default function RegisterFarmer() {
             textColor="#063C2D"
             activeUnderlineColor="#063C2D"
             label="Nombres"
-            value={email}
-            onChangeText={(email) => setEmail(email)}
+            value={data.nombres}
+            onChangeText={(e) => setData({ ...data, nombres: e })}
           />
           <TextInput
             style={styles.inputGroup}
             textColor="#063C2D"
             activeUnderlineColor="#063C2D"
             label="Apellidos"
-            value={email}
-            onChangeText={(email) => setEmail(email)}
+            value={data.apellidos}
+            onChangeText={(e) => setData({ ...data, apellidos: e })}
           />
 
           <View style={styles.inputGroupTwo}>
@@ -131,9 +156,9 @@ export default function RegisterFarmer() {
               textColor="#063C2D"
               activeUnderlineColor="#063C2D"
               label="Identificacion"
-              value={email}
+              value={data.identificacion}
               keyboardType={"numeric"}
-              onChangeText={(email) => setEmail(email)}
+              onChangeText={(e) => setData({ ...data, identificacion: e })}
             />
           </View>
           <TextInput
@@ -141,9 +166,9 @@ export default function RegisterFarmer() {
             textColor="#063C2D"
             activeUnderlineColor="#063C2D"
             label="Correo electronico"
-            value={email}
+            value={data.email}
             keyboardType={"email-address"}
-            onChangeText={(email) => setEmail(email)}
+            onChangeText={(e) => setData({ ...data, email: e })}
           />
           <View style={styles.inputGroupTwo}>
             <TextInput
@@ -151,18 +176,18 @@ export default function RegisterFarmer() {
               textColor="#063C2D"
               activeUnderlineColor="#063C2D"
               label="Contraseña"
-              value={password}
+              value={data.password}
               secureTextEntry={true}
-              onChangeText={(password) => setPassword(password)}
+              onChangeText={(e) => setData({ ...data, password: e })}
             />
             <TextInput
               style={styles.input50}
               textColor="#063C2D"
               activeUnderlineColor="#063C2D"
               label="Telefono"
-              value={email}
+              value={data.telefono}
               keyboardType={"numeric"}
-              onChangeText={(email) => setEmail(email)}
+              onChangeText={(e) => setData({ ...data, telefono: e })}
             />
           </View>
         </View>
@@ -172,7 +197,7 @@ export default function RegisterFarmer() {
             style={styles.formButton}
             buttonColor="#15A249"
             mode="contained"
-            onPress={() => console.log("guardar")}
+            onPress={() => create()}
           >
             <Text style={styles.text}>Guardar</Text>
           </Button>

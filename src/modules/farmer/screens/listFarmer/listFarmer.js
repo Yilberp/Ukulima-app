@@ -1,34 +1,26 @@
 import { View, SafeAreaView, FlatList, Image } from "react-native";
 import { Button, Card, Text } from "react-native-paper";
 import Constants from "expo-constants";
-import { useState, useEffect, useContext } from "react";
-import LoginContext from "../../../../context/auth/authContext";
+import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-native";
-import { getPokemonApi } from "../../../../api/Ukulima";
+import AgricultorContext from "../../../../context/agricultor/agricultorContext";
+import ListItemFarmer from "../../components/ListItemFarmer";
+import LoginContext from "../../../../context/auth/authContext";
 export default function ListFarmer() {
-  const [data, setData] = useState([]);
   const navigate = useNavigate();
   const {
     authContext: { signOut },
   } = useContext(LoginContext);
+  const { getAgricultores, agricultores, isLoading } =
+    useContext(AgricultorContext);
   // Los estados que van en [] van a mandar sobre el useEffect
   // Por ej: Si yo tengo un estado en [] y si este es modificado, el useEffect se vuelve a ejecutar
   useEffect(() => {
     // Hay que hacer una función anonima auto-ejecutable
     (async () => {
-      await loadPokemons();
+      await getAgricultores();
     })();
   }, []);
-  // loadPokemons Tambien es promesa por lo tanto en el useEffect tambien hay que hacer un async await
-  const loadPokemons = async () => {
-    try {
-      // getPokemonApi devuelve una promesa y hay que resolverla con await
-      const response = await getPokemonApi();
-      setData(response);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <SafeAreaView
@@ -101,56 +93,9 @@ export default function ListFarmer() {
         Lista de Agricultores
       </Text>
       <FlatList
-        data={data}
-        renderItem={({ item: farmer }) => (
-          <View key={farmer.identificacion} style={{ padding: 10 }}>
-            <Card style={{ flex: 1 }}>
-              <Card.Content
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Image
-                  style={{
-                    marginRight: 20,
-                    height: 50,
-                    width: 50,
-                    borderRadius: 14,
-                  }}
-                  resizeMode={"cover"}
-                  source={require("../../../../../assets/ukulima-logo.png")}
-                />
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      color: "#0E4A3A",
-                      fontSize: 16,
-                      fontWeight: "700",
-                    }}
-                  >
-                    {farmer.nombres} {farmer.apellidos}
-                  </Text>
-                  <Text
-                    style={{
-                      color: "#0E4A3A",
-                      fontSize: 16,
-                      fontWeight: "400",
-                    }}
-                  >
-                    {farmer.email}
-                  </Text>
-                </View>
-                <Button
-                  onPress={() => navigate("/viewFarmer", { state: farmer })}
-                  textColor="#15A249"
-                  icon="eye"
-                ></Button>
-              </Card.Content>
-            </Card>
-          </View>
-        )}
+        data={agricultores}
+        renderItem={({ item: farmer }) => <ListItemFarmer farmer={farmer} />}
+        keyExtractor={(item) => item.identificacion}
       />
     </SafeAreaView>
   );
